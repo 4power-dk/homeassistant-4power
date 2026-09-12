@@ -1,0 +1,100 @@
+{
+  "config": {
+    "step": {
+      "pick_implementation": {
+        "title": "Log ind hos 4Power"
+      },
+      "reauth_confirm": {
+        "title": "Log ind hos 4Power igen",
+        "description": "Home Assistant skal have dig til at logge ind hos 4Power igen for at kunne styre dit spa."
+      }
+    },
+    "abort": {
+      "already_configured": "Denne 4Power-konto er allerede tilføjet.",
+      "authorize_url_timeout": "Tidsfristen udløb, da login-linket til 4Power skulle laves.",
+      "missing_configuration": "4Power-integrationen er ikke sat rigtigt op.",
+      "no_url_available": "Ingen URL tilgængelig. Se dokumentationen.",
+      "oauth_error": "4Power svarede med ugyldige data.",
+      "oauth_failed": "Login hos 4Power mislykkedes.",
+      "oauth_timeout": "Tidsfristen udløb under login hos 4Power.",
+      "oauth_unauthorized": "4Power afviste loginet. Tjek at din konto har adgang.",
+      "reauth_successful": "Logget ind hos 4Power igen."
+    },
+    "create_entry": {
+      "default": "Forbundet til 4Power."
+    }
+  },
+  "entity": {
+    "climate": {
+      "fourpower": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "ready": "Klar",
+              "rest": "Hvile"
+            }
+          }
+        }
+      }
+    },
+    "light": {
+      "light": {
+        "name": "Lys"
+      }
+    },
+    "switch": {
+      "jet1": {
+        "name": "Jet 1"
+      },
+      "jet2": {
+        "name": "Jet 2"
+      },
+      "aqua_filling": {
+        "name": "Automatisk fyldning"
+      }
+    },
+    "binary_sensor": {
+      "heating": {
+        "name": "Opvarmning"
+      },
+      "circulation": {
+        "name": "Cirkulation"
+      },
+      "flow": {
+        "name": "Vandgennemstrømning"
+      },
+      "level": {
+        "name": "Vandniveau"
+      },
+      "thermo": {
+        "name": "Termosikring"
+      },
+      "emergency_shutdown": {
+        "name": "Nødstop"
+      },
+      "no_flow_shutdown": {
+        "name": "Stop ved manglende flow"
+      },
+      "aqua_filling": {
+        "name": "Fylder"
+      },
+      "auto_refill": {
+        "name": "Automatisk efterfyldning"
+      }
+    },
+    "sensor": {
+      "water_temperature": {
+        "name": "Vandtemperatur"
+      },
+      "ph": {
+        "name": "pH"
+      },
+      "orp": {
+        "name": "Desinfektionsniveau (ORP)"
+      },
+      "wifi_rssi": {
+        "name": "Wi-Fi-signal"
+      }
+    }
+  }
+}

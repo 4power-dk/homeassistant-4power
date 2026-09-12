@@ -1,0 +1,52 @@
+{
+  "config": {
+    "step": {
+      "pick_implementation": { "title": "Sign in to 4Power" },
+      "reauth_confirm": {
+        "title": "Sign in to 4Power again",
+        "description": "Home Assistant needs you to sign in to 4Power again to keep controlling your spa."
+      }
+    },
+    "abort": {
+      "already_configured": "This 4Power account is already set up.",
+      "authorize_url_timeout": "Timed out generating the 4Power sign-in link.",
+      "missing_configuration": "The 4Power integration is not configured correctly.",
+      "no_url_available": "No URL available. See the documentation for details.",
+      "oauth_error": "4Power returned an invalid response.",
+      "oauth_failed": "Signing in to 4Power failed.",
+      "oauth_timeout": "Timed out signing in to 4Power.",
+      "oauth_unauthorized": "4Power refused the sign-in. Check that your account has access.",
+      "reauth_successful": "Signed in to 4Power again."
+    },
+    "create_entry": { "default": "Connected to 4Power." }
+  },
+  "entity": {
+    "climate": { "fourpower": { "state_attributes": { "preset_mode": { "state": {
+      "ready": "Ready",
+      "rest": "Rest"
+    } } } } },
+    "light": { "light": { "name": "Light" } },
+    "switch": {
+      "jet1": { "name": "Jet 1" },
+      "jet2": { "name": "Jet 2" },
+      "aqua_filling": { "name": "Auto fill" }
+    },
+    "binary_sensor": {
+      "heating": { "name": "Heating" },
+      "circulation": { "name": "Circulation" },
+      "flow": { "name": "Water flow" },
+      "level": { "name": "Water level" },
+      "thermo": { "name": "Thermal switch" },
+      "emergency_shutdown": { "name": "Emergency shutdown" },
+      "no_flow_shutdown": { "name": "No-flow shutdown" },
+      "aqua_filling": { "name": "Filling" },
+      "auto_refill": { "name": "Auto refill" }
+    },
+    "sensor": {
+      "water_temperature": { "name": "Water temperature" },
+      "ph": { "name": "pH" },
+      "orp": { "name": "Sanitizer level (ORP)" },
+      "wifi_rssi": { "name": "Wi-Fi signal" }
+    }
+  }
+}

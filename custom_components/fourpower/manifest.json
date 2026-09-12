@@ -1,0 +1,13 @@
+{
+  "domain": "fourpower",
+  "name": "4Power",
+  "codeowners": ["@lubker"],
+  "config_flow": true,
+  "dependencies": ["application_credentials"],
+  "documentation": "https://github.com/4power-dk/homeassistant-4power",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/4power-dk/homeassistant-4power/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}
