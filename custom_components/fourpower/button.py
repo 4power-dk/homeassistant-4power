@@ -10,7 +10,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import FourPowerConfigEntry
 from .entity import FourPowerEntity
-from .switch import async_send
+from .switch import async_send_one_shot
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -62,6 +62,6 @@ class FourPowerButton(FourPowerEntity, ButtonEntity):
         self.entity_description = description
 
     async def async_press(self) -> None:
-        await async_send(
-            self.coordinator, self._device_id, self.entity_description.command_key, True
+        await async_send_one_shot(
+            self.coordinator, self._device_id, self.entity_description.command_key, "start"
         )

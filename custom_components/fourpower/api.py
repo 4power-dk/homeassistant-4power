@@ -29,6 +29,10 @@ class FourPowerSubscriptionRequired(Exception):
     """This spa has no active subscription, so the cloud will not command it."""
 
 
+class FourPowerAdminOnly(Exception):
+    """A 4Power service action the signed-in account may not perform."""
+
+
 class FourPowerOffline(Exception):
     """The spa is not reachable, so the command was refused rather than lost."""
 
@@ -97,4 +101,34 @@ class FourPowerApi:
         if resp.status >= 400:
             body = await resp.text()
             raise FourPowerApiError(f"{output}={value!r} on {device_id}: {resp.status} {body[:200]}")
+        return await resp.json()
+
+    async def async_send_command(
+        self, device_id: str, cmd: str, action: str = "start"
+    ) -> dict[str, Any]:
+        """Send a ONE-SHOT command (aquaFilling, diagnosticRun...).
+
+        A different channel from an output, not a different spelling of one.
+        Outputs are written to the shadow; these go to `spa/<id>/command` with a
+        timestamp and a never-reused nonce, and the firmware dispatches them as
+        AUTOMATION. That distinction is load-bearing: filling via the shadow is
+        dispatched as a USER press, which the firmware ignores while the spa is
+        on, so it silently does nothing on a running spa.
+
+        The cloud mints the timestamp and nonce — never this client, which
+        cannot know the device's clock skew and must not be able to replay.
+        """
+        payload = {"deviceId": device_id, "command": cmd, "action": action}
+        resp = await self._session.post(
+            API_COMMAND, headers=await self._headers(), json=payload
+        )
+        if resp.status == 401:
+            raise FourPowerAuthError("token rejected")
+        if resp.status == 403:
+            raise FourPowerAdminOnly(cmd)
+        if resp.status == 402:
+            raise FourPowerSubscriptionRequired(device_id)
+        if resp.status >= 400:
+            body = await resp.text()
+            raise FourPowerApiError(f"{cmd} on {device_id}: {resp.status} {body[:200]}")
         return await resp.json()
