@@ -10,7 +10,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import FourPowerConfigEntry
 from .entity import FourPowerEntity
-from .switch import async_send_one_shot
+from .switch import async_send
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -29,6 +29,13 @@ DESCRIPTIONS: tuple[FourPowerButtonDescription, ...] = (
     # offer an "off" that does nothing, and would flip back by itself when the
     # firmware finished. A button says exactly what is on offer: start it.
     # Whether it is currently filling is the `Filling` binary sensor's job.
+    #
+    # Sent as a shadow output, which the firmware dispatches as a USER press.
+    # That fills an EMPTY spa for any account and on every model — including
+    # SpaControl, whose firmware has no command channel at all. It will NOT top
+    # up a spa that is already running: setFunction() ignores a user press then.
+    # That is deliberate and accepted — topping up a full spa is a 4Power
+    # service action, not something to do from a home dashboard.
     FourPowerButtonDescription(
         key="fill_spa",
         state_key="aquaFilling",
@@ -62,6 +69,6 @@ class FourPowerButton(FourPowerEntity, ButtonEntity):
         self.entity_description = description
 
     async def async_press(self) -> None:
-        await async_send_one_shot(
-            self.coordinator, self._device_id, self.entity_description.command_key, "start"
+        await async_send(
+            self.coordinator, self._device_id, self.entity_description.command_key, True
         )

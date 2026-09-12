@@ -16,7 +16,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import FourPowerConfigEntry
-from .api import FourPowerAdminOnly, FourPowerOffline, FourPowerSubscriptionRequired
+from .api import FourPowerOffline, FourPowerSubscriptionRequired
 from .entity import FourPowerEntity
 
 _LOGGER = logging.getLogger(__name__)
@@ -102,10 +102,6 @@ async def async_send(coordinator, device_id: str, output: str, value: Any) -> No
             "This spa has no active 4Power subscription, so it cannot be controlled "
             "from Home Assistant"
         ) from err
-    except FourPowerAdminOnly as err:
-        raise HomeAssistantError(
-            "This is a 4Power service action and is not available to your account"
-        ) from err
     except FourPowerOffline as err:
         raise HomeAssistantError(
             "The spa is not reachable right now, so the command was not sent"
@@ -114,23 +110,3 @@ async def async_send(coordinator, device_id: str, output: str, value: Any) -> No
         raise HomeAssistantError(f"4Power refused the command: {err}") from err
     await coordinator.async_request_refresh_soon()
 
-
-async def async_send_one_shot(coordinator, device_id: str, cmd: str, action: str = "start") -> None:
-    """Send a one-shot command, translating the cloud's verdict for the user."""
-    try:
-        await coordinator.api.async_send_command(device_id, cmd, action)
-    except FourPowerAdminOnly as err:
-        raise HomeAssistantError(
-            "Filling is a 4Power service action and is not available to your account"
-        ) from err
-    except FourPowerSubscriptionRequired as err:
-        raise HomeAssistantError(
-            "This spa has no active 4Power subscription, so it cannot be controlled "
-            "from Home Assistant"
-        ) from err
-    except Exception as err:  # noqa: BLE001 — surfaced to the user
-        raise HomeAssistantError(f"4Power refused the command: {err}") from err
-    # Published is not delivered: an offline spa misses a plain publish, which
-    # is what makes the channel replay-safe. Re-poll so the Filling sensor
-    # shows whether it actually started.
-    await coordinator.async_request_refresh_soon()
