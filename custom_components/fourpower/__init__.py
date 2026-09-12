@@ -4,18 +4,14 @@ from __future__ import annotations
 
 import logging
 
-from homeassistant.components.application_credentials import (
-    ClientCredential,
-    async_import_client_credential,
-)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import aiohttp_client, config_entry_oauth2_flow
 
 from .api import FourPowerApi
-from .const import CLIENT_ID, DOMAIN
 from .coordinator import FourPowerCoordinator
+from .oauth import async_register_our_implementation
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,24 +26,11 @@ PLATFORMS: list[Platform] = [
 type FourPowerConfigEntry = ConfigEntry[FourPowerCoordinator]
 
 
-async def async_setup(hass: HomeAssistant, config: dict) -> bool:
-    """Register our own client id so the user never has to enter one.
-
-    This is the difference between "install and log in" and "go and create
-    OAuth credentials first", which is where most vendor integrations lose
-    people. It is only safe because the client is PUBLIC: PKCE authenticates
-    the exchange, so there is no secret here to leak.
-    """
-    await async_import_client_credential(
-        hass,
-        DOMAIN,
-        ClientCredential(CLIENT_ID, "", "4Power"),
-    )
-    return True
-
-
 async def async_setup_entry(hass: HomeAssistant, entry: FourPowerConfigEntry) -> bool:
     """Set up 4Power from a config entry."""
+    # After a restart the config flow does not run, so nothing else would have
+    # registered our implementation and resolving it would fail.
+    async_register_our_implementation(hass)
     implementation = (
         await config_entry_oauth2_flow.async_get_config_entry_implementation(hass, entry)
     )

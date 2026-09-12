@@ -10,6 +10,7 @@ from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.helpers import config_entry_oauth2_flow
 
 from .const import DOMAIN, OAUTH2_SCOPE
+from .oauth import async_register_our_implementation
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,6 +33,18 @@ class FourPowerOAuth2FlowHandler(
         # insufficient_scope — it is what separates this integration's tokens
         # from Google Home account-linking tokens in the same table.
         return {"scope": OAUTH2_SCOPE}
+
+    async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Register our public client, then go straight to the 4Power login.
+
+        With exactly one implementation registered, Home Assistant skips the
+        implementation picker — so the user sees the login page and nothing
+        else. No client id, no secret, no API key.
+        """
+        async_register_our_implementation(self.hass)
+        return await super().async_step_user(user_input)
 
     async def async_step_reauth(
         self, entry_data: Mapping[str, Any]
