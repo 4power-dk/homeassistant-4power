@@ -48,9 +48,6 @@
       },
       "jet2": {
         "name": "Jet 2"
-      },
-      "fill_spa": {
-        "name": "Fyld spa"
       }
     },
     "binary_sensor": {
@@ -74,6 +71,9 @@
       },
       "auto_refill": {
         "name": "Automatisk efterfyldning"
+      },
+      "filling": {
+        "name": "Fylder"
       }
     },
     "sensor": {
@@ -88,6 +88,11 @@
       },
       "wifi_rssi": {
         "name": "Wi-Fi-signal"
+      }
+    },
+    "button": {
+      "fill_spa": {
+        "name": "Fyld spa"
       }
     }
   }

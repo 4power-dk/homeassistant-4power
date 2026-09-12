@@ -41,10 +41,6 @@ DESCRIPTIONS: tuple[FourPowerSwitchDescription, ...] = (
         key="jet2", state_key="jet2", command_key="jet2",
         translation_key="jet2", device_class=SwitchDeviceClass.SWITCH,
     ),
-    FourPowerSwitchDescription(
-        key="aqua_filling", state_key="aquaFilling", command_key="aquaFilling",
-        translation_key="fill_spa", device_class=SwitchDeviceClass.SWITCH,
-    ),
 )
 
 
