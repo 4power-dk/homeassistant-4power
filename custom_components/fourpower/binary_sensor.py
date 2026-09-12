@@ -47,14 +47,6 @@ DESCRIPTIONS: tuple[FourPowerBinaryDescription, ...] = (
         device_class=BinarySensorDeviceClass.PROBLEM,
     ),
     FourPowerBinaryDescription(
-        key="no_flow_shutdown", state_key="noFlowShutdown",
-        translation_key="no_flow_shutdown",
-        device_class=BinarySensorDeviceClass.PROBLEM,
-    ),
-    FourPowerBinaryDescription(
-        key="aqua_filling", state_key="aquaFilling", translation_key="aqua_filling",
-    ),
-    FourPowerBinaryDescription(
         key="auto_refill", state_key="autoRefill", translation_key="auto_refill",
     ),
 )

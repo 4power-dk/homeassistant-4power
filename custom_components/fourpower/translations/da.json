@@ -49,8 +49,8 @@
       "jet2": {
         "name": "Jet 2"
       },
-      "aqua_filling": {
-        "name": "Automatisk fyldning"
+      "fill_spa": {
+        "name": "Fyld spa"
       }
     },
     "binary_sensor": {
@@ -71,12 +71,6 @@
       },
       "emergency_shutdown": {
         "name": "Nødstop"
-      },
-      "no_flow_shutdown": {
-        "name": "Stop ved manglende flow"
-      },
-      "aqua_filling": {
-        "name": "Fylder"
       },
       "auto_refill": {
         "name": "Automatisk efterfyldning"
