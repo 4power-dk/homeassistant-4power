@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk -F: '{print $NF}')",
+      "Bash(node --experimental-strip-types --experimental-test-module-mocks --test tests/home-assistant.test.mjs)",
+      "Bash(python3 -c \"import json;[json.load\\(open\\(f\\)\\) for f in ['custom_components/fourpower/strings.json','custom_components/fourpower/translations/en.json','custom_components/fourpower/translations/da.json']]\")",
+      "Bash(python3 -m py_compile custom_components/fourpower/sensor.py)"
+    ],
+    "additionalDirectories": [
+      "/Users/daniel/GithubRepos/4Power/4PowerCloud/Backend API/modules",
+      "/Users/daniel/GithubRepos/4Power/4PowerCloud/Backend API/tests"
+    ]
+  }
+}
