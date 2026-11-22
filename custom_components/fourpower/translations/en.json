@@ -80,6 +80,9 @@
       "water_temperature": {
         "name": "Water temperature"
       },
+      "balboa_setpoint": {
+        "name": "Controller setpoint"
+      },
       "ph": {
         "name": "pH"
       },

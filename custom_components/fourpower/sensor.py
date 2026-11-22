@@ -36,6 +36,20 @@ DESCRIPTIONS: tuple[FourPowerSensorDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         precision=1,
     ),
+    # The setpoint the Balboa controller is actually running at, read-only —
+    # NOT a water temperature. It differs from the climate entity's target when
+    # the energy optimizer applies a delta or the pack clamped a command. The
+    # temperature device class is only there for the °C unit; no state_class,
+    # because a setpoint is not a measurement. Only SpaControl reports it, so a
+    # HydroBrain simply gets no entity.
+    FourPowerSensorDescription(
+        key="balboa_setpoint", state_key="balboaSetpoint",
+        translation_key="balboa_setpoint",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        icon="mdi:thermostat",
+        precision=1,
+    ),
     FourPowerSensorDescription(
         key="ph", state_key="ph", translation_key="ph",
         device_class=SensorDeviceClass.PH,

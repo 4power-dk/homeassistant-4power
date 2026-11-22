@@ -19,7 +19,7 @@ ID, no secret, no API key.
 | Climate | current and target temperature, heating status, **Ready / Rest** preset |
 | Light | on/off |
 | Switches | Jet 1, Jet 2, auto fill — whichever your spa has |
-| Sensors | water temperature, pH, sanitizer level (ORP), Wi-Fi signal |
+| Sensors | water temperature, controller setpoint (what the Balboa pack is actually set to), pH, sanitizer level (ORP), Wi-Fi signal |
 | Binary sensors | heating, circulation, water flow, water level, thermal switch, shutdowns |
 
 Entities are created from what your spa actually reports, so you will not get a

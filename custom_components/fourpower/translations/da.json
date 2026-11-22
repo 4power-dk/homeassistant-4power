@@ -80,6 +80,9 @@
       "water_temperature": {
         "name": "Vandtemperatur"
       },
+      "balboa_setpoint": {
+        "name": "Styringens setpunkt"
+      },
       "ph": {
         "name": "pH"
       },
