@@ -17,7 +17,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import FourPowerConfigEntry
 from .api import FourPowerOffline, FourPowerSubscriptionRequired
-from .entity import FourPowerEntity
+from .entity import FourPowerEntity, async_remove_stale, spa_has
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,16 +30,28 @@ class FourPowerSwitchDescription(SwitchEntityDescription):
     # The whitelist key the cloud accepts, which is NOT always the state key:
     # rest mode reads back as `restMode` but is commanded as `restmode`.
     command_key: str
+    # The `controls` entry saying whether this spa has the output at all.
+    control: str
 
 
 DESCRIPTIONS: tuple[FourPowerSwitchDescription, ...] = (
     FourPowerSwitchDescription(
-        key="jet1", state_key="jet1", command_key="jet1",
+        key="jet1", state_key="jet1", command_key="jet1", control="jet1",
         translation_key="jet1", device_class=SwitchDeviceClass.SWITCH,
     ),
     FourPowerSwitchDescription(
-        key="jet2", state_key="jet2", command_key="jet2",
+        key="jet2", state_key="jet2", command_key="jet2", control="jet2",
         translation_key="jet2", device_class=SwitchDeviceClass.SWITCH,
+    ),
+    FourPowerSwitchDescription(
+        key="jet3", state_key="jet3", command_key="jet3", control="jet3",
+        translation_key="jet3", device_class=SwitchDeviceClass.SWITCH,
+    ),
+    # The cloud reports the blower as `blower` whatever the firmware calls it;
+    # the command key is per spa (`air` on HydroBrain) — see command_key below.
+    FourPowerSwitchDescription(
+        key="blower", state_key="blower", command_key="blower", control="blower",
+        translation_key="blower", device_class=SwitchDeviceClass.SWITCH,
     ),
 )
 
@@ -47,20 +59,26 @@ DESCRIPTIONS: tuple[FourPowerSwitchDescription, ...] = (
 async def async_setup_entry(
     hass: HomeAssistant, entry: FourPowerConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    """Create a switch per output the spa reports — if it can be controlled.
+    """Create a switch per output the spa has — if it can be controlled.
 
     A spa without `outputControl` (an analyzer-only HydroSense, say) reports
     state but has nothing to switch; the cloud would refuse the command as an
     unsupported model, so no switch is offered.
     """
     coordinator = entry.runtime_data
-    async_add_entities(
+    entities = [
         FourPowerSwitch(coordinator, device_id, description)
         for device_id, device in coordinator.data.items()
         if (device.get("capabilities") or {}).get("outputControl")
         for description in DESCRIPTIONS
-        if description.state_key in (device.get("state") or {})
+        if spa_has(device, description.control, description.state_key)
+    ]
+    async_remove_stale(
+        hass, entry, "switch",
+        {d.key for d in DESCRIPTIONS},
+        {e.unique_id for e in entities},
     )
+    async_add_entities(entities)
 
 
 class FourPowerSwitch(FourPowerEntity, SwitchEntity):
@@ -83,10 +101,17 @@ class FourPowerSwitch(FourPowerEntity, SwitchEntity):
     async def async_turn_off(self, **kwargs: Any) -> None:
         await self._async_set(False)
 
+    @property
+    def _command_key(self) -> str:
+        # The blower is `air` on a HydroBrain and `blower` on a SpaControl; the
+        # cloud says which in controls.blowerOutput.
+        if self.entity_description.key == "blower":
+            controls = self._device.get("controls") or {}
+            return controls.get("blowerOutput") or "blower"
+        return self.entity_description.command_key
+
     async def _async_set(self, value: bool) -> None:
-        await async_send(
-            self.coordinator, self._device_id, self.entity_description.command_key, value
-        )
+        await async_send(self.coordinator, self._device_id, self._command_key, value)
 
 
 async def async_send(coordinator, device_id: str, output: str, value: Any) -> None:

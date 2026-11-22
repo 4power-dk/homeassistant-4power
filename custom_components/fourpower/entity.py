@@ -4,11 +4,60 @@ from __future__ import annotations
 
 from typing import Any
 
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
 from .coordinator import FourPowerCoordinator
+
+
+def spa_has(device: dict[str, Any], control: str, state_key: str) -> bool:
+    """Whether a spa has a jet, the blower or filling.
+
+    The cloud answers this in `controls` — the same rule its device page uses:
+    the installation's profile, and on a Balboa spa its known pumps and blower.
+    A cloud too old to send `controls` falls back to "the spa reports the key",
+    which is how every entity here was created before.
+    """
+    controls = device.get("controls")
+    if isinstance(controls, dict):
+        return bool(controls.get(control))
+    return state_key in (device.get("state") or {})
+
+
+def controls_signature(data: dict[str, dict[str, Any]] | None) -> tuple:
+    """What decides which spas and controls exist — a change means a reload."""
+    return tuple(
+        sorted(
+            (device_id, tuple(sorted((device.get("controls") or {}).items())))
+            for device_id, device in (data or {}).items()
+        )
+    )
+
+
+def async_remove_stale(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    domain: str,
+    governed_keys: set[str],
+    created_unique_ids: set[str],
+) -> None:
+    """Drop registry entries for controls a spa no longer has.
+
+    Only the keys `controls` governs are touched. A sensor whose reading is
+    briefly missing must keep its registry entry (and the owner's name, area
+    and dashboards with it); a jet the spa does not have must not linger as a
+    permanently unavailable switch.
+    """
+    registry = er.async_get(hass)
+    for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if entity.domain != domain or entity.unique_id in created_unique_ids:
+            continue
+        if any(entity.unique_id.endswith(f"_{key}") for key in governed_keys):
+            registry.async_remove(entity.entity_id)
 
 
 class FourPowerEntity(CoordinatorEntity[FourPowerCoordinator]):

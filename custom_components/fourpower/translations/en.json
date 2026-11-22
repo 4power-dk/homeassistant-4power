@@ -48,6 +48,12 @@
       },
       "jet2": {
         "name": "Jet 2"
+      },
+      "jet3": {
+        "name": "Jet 3"
+      },
+      "blower": {
+        "name": "Blower"
       }
     },
     "binary_sensor": {

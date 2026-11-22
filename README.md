@@ -18,12 +18,17 @@ ID, no secret, no API key.
 |---|---|
 | Climate | current and target temperature, heating status, **Ready / Rest** preset |
 | Light | on/off |
-| Switches | Jet 1, Jet 2, auto fill — whichever your spa has |
+| Switches | Jet 1, Jet 2, Jet 3, blower — whichever your spa has |
+| Button | Fill spa — only on a spa that can fill |
 | Sensors | water temperature, controller setpoint (what the Balboa pack is actually set to), pH, sanitizer level (ORP), Wi-Fi signal |
 | Binary sensors | heating, circulation, water flow, water level, thermal switch, shutdowns |
 
-Entities are created from what your spa actually reports, so you will not get a
-Jet 2 switch on a spa with one jet, or a pH sensor on a spa with no analyzer.
+Entities follow what your spa actually has, so you will not get a Jet 2 switch
+on a spa with one jet, a fill button on a spa without a fill valve, or a pH
+sensor on a spa with no analyzer. Jets, blower and filling follow the same
+setup as the 4Power app: the spa's configuration and, on a Balboa spa, its pump
+count and blower. Change that setup in the app and Home Assistant adds or
+removes the entities by itself at the next poll.
 
 ## A subscription is required
 

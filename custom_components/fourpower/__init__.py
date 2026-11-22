@@ -6,11 +6,12 @@ import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import aiohttp_client, config_entry_oauth2_flow
 
 from .api import FourPowerApi
 from .coordinator import FourPowerCoordinator
+from .entity import controls_signature
 from .oauth import async_register_our_implementation
 
 _LOGGER = logging.getLogger(__name__)
@@ -54,6 +55,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: FourPowerConfigEntry) ->
 
     entry.runtime_data = coordinator
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    # Entities are created once, from the spas and controls known now. When
+    # that changes — a dealer edits the spa's profile, the owner sets the pump
+    # count, the Balboa board reports its equipment for the first time, a spa
+    # is added or its subscription lapses — reload, so jets, blower and fill
+    # appear or disappear without the owner having to reload by hand.
+    signature = controls_signature(coordinator.data)
+
+    @callback
+    def _reload_if_controls_changed() -> None:
+        if coordinator.last_update_success and controls_signature(coordinator.data) != signature:
+            _LOGGER.info("4Power: the spas' controls changed; reloading to match")
+            hass.config_entries.async_schedule_reload(entry.entry_id)
+
+    entry.async_on_unload(coordinator.async_add_listener(_reload_if_controls_changed))
     return True
 
 

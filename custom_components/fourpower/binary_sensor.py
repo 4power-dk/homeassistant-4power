@@ -13,7 +13,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import FourPowerConfigEntry
-from .entity import FourPowerEntity
+from .entity import FourPowerEntity, async_remove_stale, spa_has
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -21,6 +21,9 @@ class FourPowerBinaryDescription(BinarySensorEntityDescription):
     """A boolean the spa reports."""
 
     state_key: str
+    # Set when the sensor belongs to a control the spa may not have: filling
+    # sensors exist only on a spa that can fill (controls.fill).
+    control: str | None = None
 
 
 DESCRIPTIONS: tuple[FourPowerBinaryDescription, ...] = (
@@ -48,10 +51,11 @@ DESCRIPTIONS: tuple[FourPowerBinaryDescription, ...] = (
     ),
     FourPowerBinaryDescription(
         key="aqua_filling", state_key="aquaFilling", translation_key="filling",
-        device_class=BinarySensorDeviceClass.RUNNING,
+        device_class=BinarySensorDeviceClass.RUNNING, control="fill",
     ),
     FourPowerBinaryDescription(
         key="auto_refill", state_key="autoRefill", translation_key="auto_refill",
+        control="fill",
     ),
 )
 
@@ -61,12 +65,19 @@ async def async_setup_entry(
 ) -> None:
     """Create a binary sensor for each boolean the spa actually reports."""
     coordinator = entry.runtime_data
-    async_add_entities(
+    entities = [
         FourPowerBinarySensor(coordinator, device_id, description)
         for device_id, device in coordinator.data.items()
         for description in DESCRIPTIONS
         if description.state_key in (device.get("state") or {})
+        and (description.control is None or spa_has(device, description.control, description.state_key))
+    ]
+    async_remove_stale(
+        hass, entry, "binary_sensor",
+        {d.key for d in DESCRIPTIONS if d.control},
+        {e.unique_id for e in entities},
     )
+    async_add_entities(entities)
 
 
 class FourPowerBinarySensor(FourPowerEntity, BinarySensorEntity):

@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import FourPowerConfigEntry
-from .entity import FourPowerEntity
+from .entity import FourPowerEntity, async_remove_stale, spa_has
 from .switch import async_send
 
 
@@ -50,13 +50,20 @@ async def async_setup_entry(
 ) -> None:
     """Create a button per one-shot command the spa supports."""
     coordinator = entry.runtime_data
-    async_add_entities(
+    # Only a spa that has a way to fill gets the button (controls.fill).
+    entities = [
         FourPowerButton(coordinator, device_id, description)
         for device_id, device in coordinator.data.items()
         if (device.get("capabilities") or {}).get("outputControl")
         for description in DESCRIPTIONS
-        if description.state_key in (device.get("state") or {})
+        if spa_has(device, "fill", description.state_key)
+    ]
+    async_remove_stale(
+        hass, entry, "button",
+        {d.key for d in DESCRIPTIONS},
+        {e.unique_id for e in entities},
     )
+    async_add_entities(entities)
 
 
 class FourPowerButton(FourPowerEntity, ButtonEntity):
